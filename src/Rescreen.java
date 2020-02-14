@@ -16,6 +16,7 @@ public class Rescreen {
 	static String MERGED_VCF = "";
 	static String SAMTOOLS_PATH = "";
 	static String SNIFFLES_PATH = "";
+	static int MAX_DIST = 500;
 	static void usage()
 	{
 		System.out.println("java -cp src Rescreen <args>");
@@ -27,6 +28,7 @@ public class Rescreen {
 		System.out.println("Optional arguments:");
 		System.out.println("  sniffles_path=<string>");
 		System.out.println("  samtools_path=<string>");
+		System.out.println("  max_dist=<int>");
 	}
 	static void parseArgs(String[] args)
 	{
@@ -59,6 +61,10 @@ public class Rescreen {
 			{
 				SAMTOOLS_PATH = val;
 			}
+			else if(param.equals("max_dist"))
+			{
+				MAX_DIST = Integer.parseInt(val);
+			}
 		}
 		if(MERGED_VCF.length() == 0 || BAM_FILE_LIST.length() == 0 || OUT_FILE.length() == 0)
 		{
@@ -87,7 +93,7 @@ public class Rescreen {
 			{
 				Variant candidateMatch = VariantInput.fromVcfEntry(cur, 1);
 				double dist = toGenotype.distance(candidateMatch);
-				if(dist < 100)
+				if(dist < MAX_DIST)
 				{
 					input.close();
 					return true;
