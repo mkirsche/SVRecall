@@ -73,6 +73,7 @@ public class Rescreen {
 	{
 		Variant toGenotype = VariantInput.fromVcfEntry(entry, 0);
 		Scanner input = new Scanner(new FileInputStream(new File(vcfFile)));
+		int count = 0;
 		while(input.hasNext())
 		{
 			String line = input.nextLine();
@@ -80,6 +81,7 @@ public class Rescreen {
 			{
 				continue;
 			}
+			count++;
 			VcfEntry cur = VcfEntry.fromLine(vcfFile);
 			if(cur.getType().equals(entry.getType()) && cur.getStrand().equals(entry.getStrand()))
 			{
@@ -93,6 +95,7 @@ public class Rescreen {
 			}
 		}
 		input.close();
+		System.out.println("Failed to find the variant in " + count + " calls");
 		return false;
 	}
 	public static void main(String[] args) throws Exception
@@ -157,6 +160,7 @@ public class Rescreen {
 						try {
 							if(variantExists(entry, snifflesFile))
 							{
+								System.out.println("Found the variant in sample " + i);
 								newSuppVec[i] = '1';
 							}
 						} catch(Exception e) {}
