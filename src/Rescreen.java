@@ -127,7 +127,7 @@ public class Rescreen {
 			}
 			
 			// Ignore non-specific calls
-			if(entry.hasInfoField("IS_SPECIFIC") && entry.getInfo("IS_SPECIFIC").equals("1"))
+			if(entry.hasInfoField("IS_SPECIFIC") && entry.getInfo("IS_SPECIFIC").equals("0"))
 			{
 				continue;
 			}
