@@ -71,6 +71,7 @@ public class Rescreen {
 	 */
 	static boolean variantExists(VcfEntry entry, String vcfFile) throws Exception
 	{
+		System.out.println("Genotyping " + entry.getId());
 		Variant toGenotype = VariantInput.fromVcfEntry(entry, 0);
 		Scanner input = new Scanner(new FileInputStream(new File(vcfFile)));
 		int count = 0;
