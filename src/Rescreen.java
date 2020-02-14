@@ -14,6 +14,8 @@ public class Rescreen {
 	static String BAM_FILE_LIST = "";
 	static String OUT_FILE = "";
 	static String MERGED_VCF = "";
+	static String SAMTOOLS_PATH = "";
+	static String SNIFFLES_PATH = "";
 	static void usage()
 	{
 		System.out.println("java -cp src Rescreen <args>");
@@ -23,6 +25,9 @@ public class Rescreen {
 		System.out.println("  vcf_file_list=<string>");
 		System.out.println("  bam_file_list=<string>");
 		System.out.println("  out_file=<string>");
+		System.out.println("Optional arguments:");
+		System.out.println("  sniffles_path=<string>");
+		System.out.println("  samtools_path=<string>");
 	}
 	static void parseArgs(String[] args)
 	{
@@ -46,6 +51,14 @@ public class Rescreen {
 			else if(param.equals("out_file"))
 			{
 				OUT_FILE = val;
+			}
+			else if(param.equals("sniffles_path"))
+			{
+				SNIFFLES_PATH = val;
+			}
+			else if(param.equals("samtools_path"))
+			{
+				SAMTOOLS_PATH = val;
 			}
 		}
 		if(MERGED_VCF.length() == 0 || BAM_FILE_LIST.length() == 0 || OUT_FILE.length() == 0)
@@ -101,6 +114,12 @@ public class Rescreen {
 			
 			// Ignore translocations/breakend variants for now
 			if(entry.getType().equals("TRA") || entry.getType().equals("BND"))
+			{
+				continue;
+			}
+			
+			// Ignore non-specific calls
+			if(entry.hasInfoField("IS_SPECIFIC") && entry.getInfo("IS_SPECIFIC").equals("1"))
 			{
 				continue;
 			}
