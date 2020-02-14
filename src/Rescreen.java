@@ -170,6 +170,10 @@ public class Rescreen {
 						}
 						if((f = new File(snifflesFile)).exists())
 						{
+							//f.delete();
+						}
+						if((f = new File(snifflesFile + "_tmp_genotype")).exists())
+						{
 							f.delete();
 						}
 							
