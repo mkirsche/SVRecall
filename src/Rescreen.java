@@ -82,7 +82,7 @@ public class Rescreen {
 				continue;
 			}
 			count++;
-			VcfEntry cur = VcfEntry.fromLine(vcfFile);
+			VcfEntry cur = VcfEntry.fromLine(line);
 			if(cur.getType().equals(entry.getType()) && cur.getStrand().equals(entry.getStrand()))
 			{
 				Variant candidateMatch = VariantInput.fromVcfEntry(cur, 1);
@@ -170,7 +170,7 @@ public class Rescreen {
 						}
 						if((f = new File(snifflesFile)).exists())
 						{
-							//f.delete();
+							f.delete();
 						}
 						if((f = new File(snifflesFile + "_tmp_genotype")).exists())
 						{
