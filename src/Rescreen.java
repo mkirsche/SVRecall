@@ -71,7 +71,6 @@ public class Rescreen {
 	 */
 	static boolean variantExists(VcfEntry entry, String vcfFile) throws Exception
 	{
-		System.out.println("Genotyping " + entry.getId());
 		Variant toGenotype = VariantInput.fromVcfEntry(entry, 0);
 		Scanner input = new Scanner(new FileInputStream(new File(vcfFile)));
 		int count = 0;
@@ -145,6 +144,7 @@ public class Rescreen {
 							ExternalSoftware.runSniffles(tmpFile, snifflesFile);
 						} catch (Exception e) {
 							System.out.println("Error extracting " + bamFile + " region " + region);
+							System.out.println(e.getMessage());
 							continue;
 						}
 						
@@ -164,7 +164,10 @@ public class Rescreen {
 								System.out.println("Found the variant in sample " + i);
 								newSuppVec[i] = '1';
 							}
-						} catch(Exception e) {}
+						} catch(Exception e) { 
+							System.out.println("Error genotyping " + entry.getId());
+							System.out.println(e.getMessage());
+						}
 						if((f = new File(snifflesFile)).exists())
 						{
 							f.delete();
