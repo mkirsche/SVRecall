@@ -76,7 +76,7 @@ public class Rescreen {
 		while(input.hasNext())
 		{
 			String line = input.nextLine();
-			if(line.length() == 0 || line.startsWith(">"))
+			if(line.length() == 0 || line.startsWith("#"))
 			{
 				continue;
 			}
@@ -105,7 +105,7 @@ public class Rescreen {
 		while(input.hasNext())
 		{
 			String line = input.nextLine();
-			if(line.length() == 0 || line.startsWith(">"))
+			if(line.length() == 0 || line.startsWith("#"))
 			{
 				continue;
 			}
