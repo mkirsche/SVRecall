@@ -22,7 +22,6 @@ public class Rescreen {
 		System.out.println();
 		System.out.println("Required arguments:");
 		System.out.println("  merged_vcf=<string>");
-		System.out.println("  vcf_file_list=<string>");
 		System.out.println("  bam_file_list=<string>");
 		System.out.println("  out_file=<string>");
 		System.out.println("Optional arguments:");
