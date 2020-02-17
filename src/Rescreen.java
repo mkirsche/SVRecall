@@ -17,6 +17,8 @@ public class Rescreen {
 	static String SAMTOOLS_PATH = "";
 	static String SNIFFLES_PATH = "";
 	static int MAX_DIST = 500;
+	static int PADDING = 10000;
+	static int SNIFFLES_MAX_DIST = 1000;
 	static void usage()
 	{
 		System.out.println("java -cp src Rescreen <args>");
@@ -64,6 +66,14 @@ public class Rescreen {
 			else if(param.equals("max_dist"))
 			{
 				MAX_DIST = Integer.parseInt(val);
+			}
+			else if(param.equals("padding"))
+			{
+				PADDING = Integer.parseInt(val);
+			}
+			else if(param.equals("sniffles_max_dist"))
+			{
+				SNIFFLES_MAX_DIST = Integer.parseInt(val);
 			}
 		}
 		if(MERGED_VCF.length() == 0 || BAM_FILE_LIST.length() == 0 || OUT_FILE.length() == 0)
@@ -143,7 +153,7 @@ public class Rescreen {
 						String bamFile = bamFiles.get(i);
 						String tmpFile = entry.getId() + "_" + StringUtils.fileBaseName(bamFile);
 						String snifflesFile = tmpFile + ".vcf";
-						String region = entry.getChromosome() + ":" + Math.max(1, entry.getPos() - 10000) + "-" + (entry.getPos() + 10000);
+						String region = entry.getChromosome() + ":" + Math.max(1, entry.getPos() - PADDING) + "-" + (entry.getPos() + PADDING);
 						try {
 							ExternalSoftware.runSamtoolsView(bamFile, tmpFile, region);
 							ExternalSoftware.runSamtoolsIndex(tmpFile);

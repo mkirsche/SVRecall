@@ -7,7 +7,7 @@ public class ExternalSoftware {
 	static void runSniffles(String inputFile, String outFile) throws Exception
 	{
 		System.out.println("Running Sniffles on " + inputFile);
-		String command = Rescreen.SNIFFLES_PATH + " --min_support 2 --max_distance 1000 --max_num_splits 10 "
+		String command = Rescreen.SNIFFLES_PATH + " --min_support 2 --max_distance " + Rescreen.SNIFFLES_MAX_DIST + " --max_num_splits 10 "
 				+ "--min_length 20 --num_reads_report -1 --min_seq_size 1000 -m " + inputFile + " -v " + outFile;
 		Process child = Runtime.getRuntime().exec(command);
 	    int exit = child.waitFor();
