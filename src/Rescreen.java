@@ -17,9 +17,10 @@ public class Rescreen {
 	static String MERGED_VCF = "";
 	static String SAMTOOLS_PATH = "";
 	static String SNIFFLES_PATH = "";
-	static int MAX_DIST = 500;
+	static int MAX_DIST = 100;
 	static int PADDING = 10000;
 	static boolean SNIFFLES_GENOTYPE = false;
+	static boolean RUN_ALL = false;
 	static int SNIFFLES_MAX_DIST = 1000;
 	static void usage()
 	{
@@ -33,6 +34,10 @@ public class Rescreen {
 		System.out.println("  sniffles_path=<string>");
 		System.out.println("  samtools_path=<string>");
 		System.out.println("  max_dist=<int>");
+		System.out.println("  padding=<int>");
+		System.out.println("  sniffles_max_dist=<int>");
+		System.out.println("  --sniffles_genotype");
+		System.out.println("  --run_all");
 	}
 	static void parseArgs(String[] args)
 	{
@@ -44,6 +49,10 @@ public class Rescreen {
 				if(s.endsWith("sniffles_genotype"))
 				{
 					SNIFFLES_GENOTYPE = true;
+				}
+				else if(s.endsWith("run_all"))
+				{
+					RUN_ALL = true;
 				}
 				continue;
 			}
@@ -159,10 +168,18 @@ public class Rescreen {
 			
 			String suppVec = entry.getInfo("SUPP_VEC");
 			char[] newSuppVec = suppVec.toCharArray();
-			if(suppVec.length() > 1 && suppVec.charAt(0) == '1')
+			if(suppVec.length() > 1)
 			{
-				for(int i = 1; i<suppVec.length(); i++)
+				if(!RUN_ALL && suppVec.charAt(0) != '1')
 				{
+					continue;
+				}
+				for(int i = 0; i<suppVec.length(); i++)
+				{
+					if(!RUN_ALL && i == 0)
+					{
+						continue;
+					}
 					if(suppVec.charAt(i) == '0')
 					{
 						String bamFile = bamFiles.get(i);
