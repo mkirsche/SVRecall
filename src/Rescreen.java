@@ -155,6 +155,8 @@ public class Rescreen {
 				continue;
 			}
 			
+			System.out.println("Processing " + entry.getId());
+			
 			String suppVec = entry.getInfo("SUPP_VEC");
 			char[] newSuppVec = suppVec.toCharArray();
 			if(suppVec.length() > 1 && suppVec.charAt(0) == '1')

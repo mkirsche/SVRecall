@@ -6,7 +6,7 @@ public class ExternalSoftware {
 	 */
 	static void runSniffles(String inputFile, String inputVcf, String outFile) throws Exception
 	{
-		System.out.println("Running Sniffles on " + inputFile);
+		System.err.println("Running Sniffles on " + inputFile);
 		String command = Rescreen.SNIFFLES_PATH + " --min_support 2 --max_distance " + Rescreen.SNIFFLES_MAX_DIST + " --max_num_splits 10 "
 				+ "--min_length 20 --num_reads_report -1 --min_seq_size 1000 -m " + inputFile + " -v " + outFile;
 		if(Rescreen.SNIFFLES_GENOTYPE)
@@ -19,11 +19,11 @@ public class ExternalSoftware {
 	    {
 	    	System.out.println("Command failed: " + command);
 	    	System.out.println("Exit code: " + exit);
-	    	System.exit(1);
+	    	throw new Exception("Sniffles failed");
 	    }
 	    else
 	    {
-	    	System.out.println("Sniffles ran successfully");
+	    	System.err.println("Sniffles ran successfully");
 	    }
 	}
 	
@@ -32,7 +32,7 @@ public class ExternalSoftware {
 	 */
 	static void runSamtoolsView(String inputFile, String outFile, String region) throws Exception
 	{
-		System.out.println("Extracting reads from " + inputFile + " " + region);
+		System.err.println("Extracting reads from " + inputFile + " " + region);
 		String command = Rescreen.SAMTOOLS_PATH + " view -b -h -o " + outFile + " " + inputFile + " " + region;
 		Process child = Runtime.getRuntime().exec(command);
 	    int exit = child.waitFor();
@@ -40,11 +40,11 @@ public class ExternalSoftware {
 	    {
 	    	System.out.println("Command failed: " + command);
 	    	System.out.println("Exit code: " + exit);
-	    	System.exit(1);
+	    	throw new Exception("Samtools view failed");
 	    }
 	    else
 	    {
-	    	System.out.println("Samtools ran successfully");
+	    	System.err.println("Samtools ran successfully");
 	    }
 	}
 	
@@ -53,7 +53,7 @@ public class ExternalSoftware {
 	 */
 	static void runSamtoolsIndex(String inputFile) throws Exception
 	{
-		System.out.println("Indexing " + inputFile);
+		System.err.println("Indexing " + inputFile);
 		String command = Rescreen.SAMTOOLS_PATH + " index " + inputFile;
 		Process child = Runtime.getRuntime().exec(command);
 	    int exit = child.waitFor();
@@ -61,11 +61,11 @@ public class ExternalSoftware {
 	    {
 	    	System.out.println("Command failed: " + command);
 	    	System.out.println("Exit code: " + exit);
-	    	System.exit(1);
+	    	throw new Exception("Samtools index failed");
 	    }
 	    else
 	    {
-	    	System.out.println("Samtools ran successfully");
+	    	System.err.println("Samtools ran successfully");
 	    }
 	}
 }
