@@ -4,11 +4,15 @@ public class ExternalSoftware {
 	/*
 	 * Runs Sniffles, currently with the set of parameters we use for the rest of the pipeline
 	 */
-	static void runSniffles(String inputFile, String outFile) throws Exception
+	static void runSniffles(String inputFile, String inputVcf, String outFile) throws Exception
 	{
 		System.out.println("Running Sniffles on " + inputFile);
 		String command = Rescreen.SNIFFLES_PATH + " --min_support 2 --max_distance " + Rescreen.SNIFFLES_MAX_DIST + " --max_num_splits 10 "
 				+ "--min_length 20 --num_reads_report -1 --min_seq_size 1000 -m " + inputFile + " -v " + outFile;
+		if(Rescreen.SNIFFLES_GENOTYPE)
+		{
+			command += " --Ivcf " + inputVcf;
+		}
 		Process child = Runtime.getRuntime().exec(command);
 	    int exit = child.waitFor();
 	    if(exit != 0)

@@ -3,6 +3,7 @@ import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 /*
  * Code for rescreening a panel of samples for variants within a particular sample.
@@ -18,6 +19,7 @@ public class Rescreen {
 	static String SNIFFLES_PATH = "";
 	static int MAX_DIST = 500;
 	static int PADDING = 10000;
+	static boolean SNIFFLES_GENOTYPE = false;
 	static int SNIFFLES_MAX_DIST = 1000;
 	static void usage()
 	{
@@ -39,6 +41,10 @@ public class Rescreen {
 			int equalsIdx = s.indexOf('=');
 			if(equalsIdx == -1)
 			{
+				if(s.endsWith("sniffles_genotype"))
+				{
+					SNIFFLES_GENOTYPE = true;
+				}
 				continue;
 			}
 			String param = s.substring(0, equalsIdx).toLowerCase();
@@ -85,7 +91,7 @@ public class Rescreen {
 	/*
 	 * Very basic genotyping of a variant in a VCF file
 	 */
-	static boolean variantExists(VcfEntry entry, String vcfFile) throws Exception
+	static boolean variantExists(int sample, VcfEntry entry, String vcfFile) throws Exception
 	{
 		Variant toGenotype = VariantInput.fromVcfEntry(entry, 0);
 		Scanner input = new Scanner(new FileInputStream(new File(vcfFile)));
@@ -111,7 +117,7 @@ public class Rescreen {
 			}
 		}
 		input.close();
-		System.out.println("Failed to find the variant in " + count + " calls");
+		System.out.println("Failed to find the variant in sample " + sample + " with " + count + " calls");
 		return false;
 	}
 	public static void main(String[] args) throws Exception
@@ -121,11 +127,18 @@ public class Rescreen {
 		
 		Scanner input = new Scanner(new FileInputStream(new File(MERGED_VCF)));
 		PrintWriter out = new PrintWriter(new File(OUT_FILE));
+		ArrayList<String> header = new ArrayList<String>();
+		SupportVectorTally svt = new SupportVectorTally();
 		while(input.hasNext())
 		{
 			String line = input.nextLine();
-			if(line.length() == 0 || line.startsWith("#"))
+			if(line.length() == 0)
 			{
+				continue;
+			}
+			if(line.startsWith("#"))
+			{
+				header.add(line);
 				continue;
 			}
 			VcfEntry entry = VcfEntry.fromLine(line);
@@ -152,16 +165,25 @@ public class Rescreen {
 					{
 						String bamFile = bamFiles.get(i);
 						String tmpFile = entry.getId() + "_" + StringUtils.fileBaseName(bamFile);
+						String gtFile = tmpFile + ".togenotype.vcf";
 						String snifflesFile = tmpFile + ".vcf";
 						String region = entry.getChromosome() + ":" + Math.max(1, entry.getPos() - PADDING) + "-" + (entry.getPos() + PADDING);
+						boolean crashed = false;
 						try {
 							ExternalSoftware.runSamtoolsView(bamFile, tmpFile, region);
 							ExternalSoftware.runSamtoolsIndex(tmpFile);
-							ExternalSoftware.runSniffles(tmpFile, snifflesFile);
+							if(SNIFFLES_GENOTYPE)
+							{
+								PrintWriter vcfOut = new PrintWriter(new File(gtFile));
+								for(String h : header) vcfOut.println(h);
+								vcfOut.println(line);
+								vcfOut.close();
+							}
+							ExternalSoftware.runSniffles(tmpFile, gtFile, snifflesFile);
 						} catch (Exception e) {
 							System.out.println("Error extracting " + bamFile + " region " + region);
 							System.out.println(e.getMessage());
-							continue;
+							crashed = true;
 						}
 						
 						// Delete temporary files
@@ -170,12 +192,20 @@ public class Rescreen {
 						{
 							f.delete();
 						}
+						if((f = new File(gtFile)).exists())
+						{
+							f.delete();
+						}
 						if((f = new File(tmpFile + ".bai")).exists())
 						{
 							f.delete();
 						}
+						if(crashed)
+						{
+							continue;
+						}
 						try {
-							if(variantExists(entry, snifflesFile))
+							if(variantExists(i, entry, snifflesFile))
 							{
 								System.out.println("Found the variant in sample " + i);
 								newSuppVec[i] = '1';
@@ -196,6 +226,7 @@ public class Rescreen {
 					}
 				}
 			}
+			svt.add(new String(newSuppVec));
 			if(!(new String(newSuppVec)).equals(suppVec))
 			{
 				System.out.println(entry.getId()+" "+suppVec+" "+new String(newSuppVec));
@@ -203,8 +234,37 @@ public class Rescreen {
 				out.println(entry);
 			}
 		}
+		System.out.println(svt);
 		input.close();
 		out.close();
 		
+	}
+	
+	static class SupportVectorTally
+	{
+		TreeMap<String, Integer> counts;
+		int size;
+		SupportVectorTally()
+		{
+			size = 0;
+			counts = new TreeMap<String, Integer>();
+		}
+		void add(String suppVec)
+		{
+			size++;
+			counts.putIfAbsent(suppVec, 0);
+			counts.put(suppVec, 1 + counts.get(suppVec));
+		}
+		public String toString()
+		{
+			StringBuilder res = new StringBuilder("");
+			res.append("Number of variants: " + size);
+			res.append("Support Vector Counts:");
+			for(String s : counts.keySet())
+			{
+				res.append("  " + s + ": " + counts.get(s));
+			}
+			return res.toString();
+		}
 	}
 }
