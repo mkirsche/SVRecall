@@ -22,6 +22,7 @@ public class Rescreen {
 	static boolean SNIFFLES_GENOTYPE = false;
 	static boolean RUN_ALL = false;
 	static boolean USE_EXTENDED = false;
+	static boolean UPDATE_ID_LISTS = false;
 	static int SNIFFLES_MAX_DIST = 1000;
 	static void usage()
 	{
@@ -40,6 +41,7 @@ public class Rescreen {
 		System.out.println("  --sniffles_genotype");
 		System.out.println("  --run_all");
 		System.out.println("  --use_extended");
+		System.out.println("  --update_id_lists");
 	}
 	static void parseArgs(String[] args)
 	{
@@ -59,6 +61,10 @@ public class Rescreen {
 				else if(s.endsWith("use_extended"))
 				{
 					USE_EXTENDED = true;
+				}
+				else if(s.endsWith("update_id_lists"))
+				{
+					UPDATE_ID_LISTS = true;
 				}
 				continue;
 			}
@@ -154,6 +160,7 @@ public class Rescreen {
 			if(line.startsWith("#"))
 			{
 				header.add(line);
+				out.println(line);
 				continue;
 			}
 			VcfEntry entry = VcfEntry.fromLine(line);
@@ -161,12 +168,14 @@ public class Rescreen {
 			// Ignore translocations/breakend variants for now
 			if(entry.getType().equals("TRA") || entry.getType().equals("BND"))
 			{
+				out.println(entry);
 				continue;
 			}
 			
 			// Ignore non-specific calls
 			if(entry.hasInfoField("IS_SPECIFIC") && entry.getInfo("IS_SPECIFIC").equals("0"))
 			{
+				out.println(entry);
 				continue;
 			}
 			
@@ -178,6 +187,7 @@ public class Rescreen {
 			{
 				if(!RUN_ALL && suppVec.charAt(0) != '1')
 				{
+					out.println(entry);
 					continue;
 				}
 				for(int i = 0; i<suppVec.length(); i++)
@@ -254,15 +264,44 @@ public class Rescreen {
 			svt.add(new String(newSuppVec));
 			if(!(new String(newSuppVec)).equals(suppVec))
 			{
-				System.out.println(entry.getId()+" "+suppVec+" "+new String(newSuppVec));
+				System.out.println("Update: change support of " + entry.getId() + " from " + suppVec + " to " + new String(newSuppVec));
 				entry.setInfo((USE_EXTENDED ? "SUPP_VEC_EXT" : "SUPP_VEC"), new String(newSuppVec));
-				out.println(entry);
+				if(UPDATE_ID_LISTS) updateIdList(entry, suppVec, new String(newSuppVec));
 			}
+			out.println(entry);
 		}
 		System.out.println(svt);
 		input.close();
 		out.close();
 		
+	}
+	
+	/*
+	 * Updates the ID List to accommodate new calls by adding filler values
+	 */
+	static void updateIdList(VcfEntry entry, String oldSupp, String newSupp) throws Exception
+	{
+		int n = oldSupp.length();
+		StringBuilder newIdList = new StringBuilder("");
+		String oldIdList = entry.getInfo(USE_EXTENDED ? "IDLIST_EXT" : "IDLIST");
+		String[] oldIds = oldIdList.split(",");
+		int idx = 0;
+		for(int i = 0; i<n; i++)
+		{
+			if(oldSupp.charAt(i) == '1')
+			{
+				// Already there, so use old ID
+				if(newIdList.length() > 0) newIdList.append(",");
+				newIdList.append(oldIds[idx]);
+				idx++;
+			}
+			else if(newSupp.charAt(i) == '1')
+			{
+				if(newIdList.length() > 0) newIdList.append(",");
+				newIdList.append("RECALL");
+			}
+		}
+		entry.setInfo(USE_EXTENDED ? "IDLIST_EXT" : "IDLIST", newIdList.toString());
 	}
 	
 	static class SupportVectorTally
