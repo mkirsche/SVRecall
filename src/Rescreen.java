@@ -21,6 +21,7 @@ public class Rescreen {
 	static int PADDING = 10000;
 	static boolean SNIFFLES_GENOTYPE = false;
 	static boolean RUN_ALL = false;
+	static boolean USE_EXTENDED = false;
 	static int SNIFFLES_MAX_DIST = 1000;
 	static void usage()
 	{
@@ -38,6 +39,7 @@ public class Rescreen {
 		System.out.println("  sniffles_max_dist=<int>");
 		System.out.println("  --sniffles_genotype");
 		System.out.println("  --run_all");
+		System.out.println("  --use_extended");
 	}
 	static void parseArgs(String[] args)
 	{
@@ -53,6 +55,10 @@ public class Rescreen {
 				else if(s.endsWith("run_all"))
 				{
 					RUN_ALL = true;
+				}
+				else if(s.endsWith("use_extended"))
+				{
+					USE_EXTENDED = true;
 				}
 				continue;
 			}
@@ -166,7 +172,7 @@ public class Rescreen {
 			
 			System.out.println("Processing " + entry.getId());
 			
-			String suppVec = entry.getInfo("SUPP_VEC");
+			String suppVec = USE_EXTENDED ? entry.getInfo("SUPP_VEC_EXT") : entry.getInfo("SUPP_VEC");
 			char[] newSuppVec = suppVec.toCharArray();
 			if(suppVec.length() > 1)
 			{
@@ -249,7 +255,7 @@ public class Rescreen {
 			if(!(new String(newSuppVec)).equals(suppVec))
 			{
 				System.out.println(entry.getId()+" "+suppVec+" "+new String(newSuppVec));
-				entry.setInfo("SUPP_VEC", new String(newSuppVec));
+				entry.setInfo((USE_EXTENDED ? "SUPP_VEC_EXT" : "SUPP_VEC"), new String(newSuppVec));
 				out.println(entry);
 			}
 		}
