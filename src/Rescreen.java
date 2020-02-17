@@ -150,6 +150,7 @@ public class Rescreen {
 		PrintWriter out = new PrintWriter(new File(OUT_FILE));
 		ArrayList<String> header = new ArrayList<String>();
 		SupportVectorTally svt = new SupportVectorTally();
+		SupportVectorTally pairwise = new SupportVectorTally();
 		while(input.hasNext())
 		{
 			String line = input.nextLine();
@@ -264,6 +265,7 @@ public class Rescreen {
 			svt.add(new String(newSuppVec));
 			if(!(new String(newSuppVec)).equals(suppVec))
 			{
+				pairwise.add(suppVec + " to " + new String(newSuppVec));
 				System.out.println("Update: change support of " + entry.getId() + " from " + suppVec + " to " + new String(newSuppVec));
 				entry.setInfo((USE_EXTENDED ? "SUPP_VEC_EXT" : "SUPP_VEC"), new String(newSuppVec));
 				if(UPDATE_ID_LISTS) updateIdList(entry, suppVec, new String(newSuppVec));
@@ -271,6 +273,11 @@ public class Rescreen {
 			out.println(entry);
 		}
 		System.out.println(svt);
+		
+		System.out.println();
+		
+		System.out.println(pairwise);
+		
 		input.close();
 		out.close();
 		
