@@ -329,11 +329,11 @@ public class Rescreen {
 		public String toString()
 		{
 			StringBuilder res = new StringBuilder("");
-			res.append("Number of variants: " + size);
-			res.append("Support Vector Counts:");
+			res.append("Number of variants: " + size + "\n");
+			res.append("Support Vector Counts:" + "\n");
 			for(String s : counts.keySet())
 			{
-				res.append("  " + s + ": " + counts.get(s));
+				res.append("  " + s + ": " + counts.get(s) + "\n");
 			}
 			return res.toString();
 		}
